@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
 import ru.mail.ruslan.androidchatclient.net.MyService;
 import ru.mail.ruslan.androidchatclient.net.MyService.MyBinder;
 
@@ -38,14 +39,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        /*
+
         if (savedInstanceState == null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             SplashFragment splashFragment = new SplashFragment();
             ft.replace(R.id.fragment_container, splashFragment, splashFragment.getTag());
             ft.commit();
         }
-        */
     }
 
     @Override
@@ -55,18 +55,30 @@ public class MainActivity extends AppCompatActivity {
         // Bind to LocalService
         Intent intent = new Intent(this, MyService.class);
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
+        /*
+        while (!mBound) {
+        }
+        Log.e(TAG, "Sending hello");
+        */
+        //mService.sendData("HELLO");
+
+        //startService(intent);
         Log.d(TAG, "onStart() ended");
     }
 
     @Override
-    protected void onStop() {
-        Log.d(TAG, "onStop() started");
-        super.onStop();
+    protected void onDestroy() {
+        Log.d(TAG, "onDestroy() started");
+        super.onDestroy();
         // Unbind from the service
         if (mBound) {
             unbindService(mConnection);
             mBound = false;
         }
-        Log.d(TAG, "onStop() ended");
+        Log.d(TAG, "onDestroy() ended");
+    }
+
+    public void sendMessage(BaseMessage msg) {
     }
 }

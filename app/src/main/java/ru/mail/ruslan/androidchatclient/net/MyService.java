@@ -1,19 +1,19 @@
 package ru.mail.ruslan.androidchatclient.net;
 
-import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Messenger;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Random;
+import java.net.ProtocolException;
 
-import ru.mail.ruslan.androidchatclient.msg.Message;
+import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.WelcomeMessage;
+import ru.mail.ruslan.androidchatclient.serialization.JsonProtocol;
+import ru.mail.ruslan.androidchatclient.serialization.Protocol;
 
 public class MyService extends Service implements SocketListener {
 
@@ -31,30 +31,41 @@ public class MyService extends Service implements SocketListener {
         }
     }
 
-    @Override
-    public void onCreate() {
-        Log.d(TAG, "onCreate() started");
-        // TODO ASYNC TASK
-        super.onCreate();
+    private void connectToServer() {
         try {
             mSocketConnectionHandler = new SocketConnectionHandler(HOST, PORT);
             mSocketConnectionHandler.addListener(this);
-            mSocketConnectionHandler.start();
 
-        } catch (Exception e) {
+            Thread thread = new Thread(mSocketConnectionHandler);
+            thread.start();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onCreate() {
+        Log.d(TAG, "onCreate() started");
+        super.onCreate();
+
+        connectToServer();
+
+        //sendData("hello");
+
+        //sendData("aloha");
+
         Log.d(TAG, "onCreate() ended");
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy() started");
+        Log.d(TAG, "onDestroy(): started");
         if (mSocketConnectionHandler != null) {
+            Log.d(TAG, "onDestroy(): mSocketConnectionHandler.stop()");
             mSocketConnectionHandler.stop();
         }
         super.onDestroy();
-        Log.d(TAG, "onDestroy() ended");
+        Log.d(TAG, "onDestroy(): ended");
     }
 
     @Override
@@ -79,7 +90,25 @@ public class MyService extends Service implements SocketListener {
     }
 
     @Override
-    public void onDataReceived(Message msg) {
+    public void onDataReceived(String data) {
+        Log.e(TAG, "onDataReceived: " + data);
 
+        JsonProtocol protocol = new JsonProtocol();
+
+        try {
+            //BaseMessage baseMessage = protocol.decode(data);
+            Log.e(TAG, "baseMessage: " + protocol.decode(data).toString());
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        }
+
+        Log.e(TAG, "shutDown: " + mSocketConnectionHandler.isShutDown());
+    }
+
+    public void sendData(String data) {
+        if (mSocketConnectionHandler != null) {
+            mSocketConnectionHandler.sendData(data);
+        }
+        // TODO если пришла ошибка - переподключиться
     }
 }
