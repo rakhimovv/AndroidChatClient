@@ -10,26 +10,12 @@ import java.util.List;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.AuthResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.Channel;
-import ru.mail.ruslan.androidchatclient.msg.response.ChannelListResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.CreateChannelResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.EnterEventMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.EnterResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.LastMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.LeaveEventMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.LeaveResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.MessageEventMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.RegisterResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.SetUserInfoResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.User;
-import ru.mail.ruslan.androidchatclient.msg.response.UserInfoResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.WelcomeMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.*;
+import ru.mail.ruslan.androidchatclient.msg.request.*;
 
 public class JsonProtocol implements Protocol {
 
     private static final String TAG = "JsonProtocol";
-
     JsonParser jsonParser;
 
     public JsonProtocol() {
@@ -37,37 +23,85 @@ public class JsonProtocol implements Protocol {
     }
 
     @Override
-    public String encode(BaseMessage data) throws ProtocolException {
+    public String encode(BaseMessage msg) throws ProtocolException {
         // builder
-        Log.d(TAG, "Build message for action: " + data.getAction());
+        Log.d(TAG, "Build message for action: " + msg.getAction());
 
-        switch (data.getAction()) {
+        JsonObject json = new JsonObject();
+        JsonObject data = new JsonObject();
+
+        switch (msg.getAction()) {
             case Action.AUTH: {
-                //return buildAuthMessage((AuthRequestMessage) data);
+                data.addProperty("login", ((AuthRequestMessage) msg).login);
+                data.addProperty("pass", ((AuthRequestMessage) msg).pass);
+                json.addProperty("action", Action.AUTH);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.CHANNEL_LIST: {
-                //return buildChannelListMessage((ChannelListRequestMessage) data);
+                data.addProperty("cid", ((ChannelListRequestMessage) msg).cid);
+                data.addProperty("cid", ((ChannelListRequestMessage) msg).sid);
+                json.addProperty("action", Action.CHANNEL_LIST);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.CREATE_CHANNEL: {
-                //return buildCreateChannelMessage((CreateChannelRequestMessage) data);
+                data.addProperty("cid", ((CreateChannelRequestMessage) msg).cid);
+                data.addProperty("sid", ((CreateChannelRequestMessage) msg).sid);
+                data.addProperty("name", ((CreateChannelRequestMessage) msg).name);
+                data.addProperty("descr", ((CreateChannelRequestMessage) msg).descr);
+                json.addProperty("action", Action.CREATE_CHANNEL);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.ENTER: {
-                //return buildEnterMessage((EnterRequestMessage) data);
+                data.addProperty("cid", ((EnterRequestMessage) msg).cid);
+                data.addProperty("sid", ((EnterRequestMessage) msg).sid);
+                data.addProperty("channel", ((EnterRequestMessage) msg).channel);
+                json.addProperty("action", Action.ENTER);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.LEAVE: {
-                //return buildLeaveMessage((LeaveRequestMessage) data);
+                data.addProperty("cid", ((LeaveRequestMessage) msg).cid);
+                data.addProperty("sid", ((LeaveRequestMessage) msg).sid);
+                data.addProperty("channel", ((LeaveRequestMessage) msg).channel);
+                json.addProperty("action", Action.LEAVE);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.REGISTER: {
-                //return buildRegisterMessage((RegisterRequestMessage) data);
+                data.addProperty("login", ((RegisterRequestMessage) msg).login);
+                data.addProperty("pass", ((RegisterRequestMessage) msg).pass);
+                data.addProperty("nick", ((RegisterRequestMessage) msg).nick);
+                json.addProperty("action", Action.REGISTER);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.SEND_MESSAGE: {
-                //return buildSendMessage((SendRequestMessage) data);
+                data.addProperty("cid", ((SendRequestMessage) msg).cid);
+                data.addProperty("sid", ((SendRequestMessage) msg).sid);
+                data.addProperty("channel", ((SendRequestMessage) msg).channel);
+                data.addProperty("body", ((SendRequestMessage) msg).body);
+                json.addProperty("action", Action.SEND_MESSAGE);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.SET_USER_INFO: {
-                //return buildSetUserInfoMessage((SetUserInfoRequestMessage) data);
+                data.addProperty("user_status", ((SetUserInfoRequestMessage) msg).userStatus);
+                data.addProperty("cid", ((SetUserInfoRequestMessage) msg).cid);
+                data.addProperty("sid", ((SetUserInfoRequestMessage) msg).sid);
+                json.addProperty("action", Action.SET_USER_INFO);
+                json.add("data", data);
+                return json.toString();
             }
             case Action.USER_INFO: {
-                //return buildUserInfoMessage((UserInfoRequestMessage) data);
+                data.addProperty("user", ((UserInfoRequestMessage) msg).user);
+                data.addProperty("cid", ((UserInfoRequestMessage) msg).cid);
+                data.addProperty("sid", ((UserInfoRequestMessage) msg).sid);
+                json.addProperty("action", Action.USER_INFO);
+                json.add("data", data);
+                return json.toString();
             }
         }
         return null;
