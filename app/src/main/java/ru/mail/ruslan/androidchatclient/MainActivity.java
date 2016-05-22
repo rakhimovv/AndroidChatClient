@@ -31,14 +31,12 @@ public class MainActivity extends AppCompatActivity {
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.d(TAG, "Connected to service");
             mRemoteService = IRemoteService.Stub.asInterface(service);
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d(TAG, "Service is disconnected");
-            //mController.processConnectionFailed();
+            mController.processConnectionFailed();
         }
     };
 
@@ -47,23 +45,22 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             switch (intent.getAction()) {
                 case RemoteService.ACTION_CONNECTED: {
-                    Log.d(TAG, "RemoteService is connected to Server");
+                    Log.e(TAG, "Successful connection to server");
                     Toast.makeText(getApplicationContext(), "Connected to server", Toast.LENGTH_SHORT).show();
                     mRemoteServiceConnectedToServer = true;
                     break;
                 }
                 case RemoteService.ACTION_CONNECTION_FAILED: {
-                    Log.d(TAG, "RemoteService's connection to Server failed");
+                    Log.e(TAG, "Connection to server failed");
                     Toast.makeText(getApplicationContext(), "Connection to server failed", Toast.LENGTH_SHORT).show();
 
                     mRemoteServiceConnectedToServer = false;
-                    //mController.processConnectionFailed();
+                    mController.processConnectionFailed();
                     break;
                 }
                 case RemoteService.ACTION_DATA_RECEIVED: {
                     String data = intent.getStringExtra("data");
                     Log.e(TAG, "Message received: " + data);
-                    Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
                     try {
                         BaseMessage message = mJsonProtocol.decode(data);
                         if (message != null) {
@@ -71,11 +68,10 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             Log.e(TAG, "Message is null");
                             mRemoteServiceConnectedToServer = false;
-                            //mController.processConnectionFailed();
+                            mController.processConnectionFailed();
                         }
                     } catch (ProtocolException e) {
                         Log.e(TAG, "JsonProtocol exception: " + data);
-                        e.printStackTrace();
                     }
                     break;
                 }
@@ -111,10 +107,10 @@ public class MainActivity extends AppCompatActivity {
             try {
                 String messageData = mJsonProtocol.encode(message);
                 if (messageData != null) {
-                    Log.d(TAG, "Send message: " + messageData);
+                    Log.e(TAG, "Send message: " + messageData);
                     mRemoteService.sendMessage(messageData);
                 } else {
-                    Log.d(TAG, "Attempt to send unknown message for class " + message.getClass().getSimpleName());
+                    Log.e(TAG, "Attempt to send unknown message for class " + message.getClass().getSimpleName());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -146,10 +142,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        Log.d(TAG, "onStart() started");
         super.onStart();
         connectToRemoteService();
-        Log.d(TAG, "onStart() ended");
     }
 
     @Override
@@ -161,9 +155,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         disconnect();
-        //mController.mPrefs
         MyPreferences.deleteAuthData(mController.mPrefs);
-        Log.e(TAG, "deleteAuthData");
+        Log.e(TAG, "onStop(): Delete Auth Data");
         super.onStop();
     }
 }

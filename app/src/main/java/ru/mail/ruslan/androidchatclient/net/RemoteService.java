@@ -6,7 +6,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import java.io.IOException;
 
@@ -54,23 +53,18 @@ public class RemoteService extends Service implements SocketListener {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate() started");
         super.onCreate();
         mBinder = new RemoteServiceBinder();
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
         connectToServer();
-        Log.d(TAG, "onCreate() ended");
     }
 
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy(): started");
         if (mSocketConnectionHandler != null) {
-            Log.d(TAG, "onDestroy(): mSocketConnectionHandler.stop()");
             mSocketConnectionHandler.stop();
         }
         super.onDestroy();
-        Log.d(TAG, "onDestroy(): ended");
     }
 
     @Override
@@ -98,9 +92,6 @@ public class RemoteService extends Service implements SocketListener {
 
     @Override
     public void onDataReceived(String data) {
-        // TODO обработать отключение сервера
-        // TODO кодировать и декодировать сообщения в сервисе
-
         Intent intent = new Intent(ACTION_DATA_RECEIVED);
         intent.putExtra("data", data);
         mLocalBroadcastManager.sendBroadcast(intent);

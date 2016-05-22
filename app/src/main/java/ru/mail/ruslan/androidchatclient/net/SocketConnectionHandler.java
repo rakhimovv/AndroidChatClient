@@ -2,8 +2,6 @@ package ru.mail.ruslan.androidchatclient.net;
 
 import android.util.Log;
 
-import com.google.gson.JsonParser;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,36 +15,28 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class SocketConnectionHandler implements ConnectionHandler {
 
     private static final String TAG = "SocketConnectionHandler";
+    private static final long RECONNECT_DELAY = 3000L;
 
-    private List<SocketListener> mListeners = new ArrayList<>();
+    private List<SocketListener> mListeners;
     private BlockingQueue<String> outboundDataQueue;
-    private boolean isShutDown;
+    private volatile boolean mStopped;
     private String mHost;
     private int mPort;
     private Socket socket;
     private InputStream mInputStream;
     private OutputStream mOutputStream;
-    private Thread outThread;
+    private Thread mOutThread;
     private Thread inThread;
-    private JsonParser jsonParser;
 
     SocketConnectionHandler(String host, int port) throws IOException {
-        Log.d(TAG, "constructor started");
         mHost = host;
         mPort = port;
-        isShutDown = false;
+        mListeners = new ArrayList<>();
         outboundDataQueue = new LinkedBlockingQueue<>();
-        jsonParser = new JsonParser();
-        Log.d(TAG, "constructor ended");
-    }
-
-    public boolean isShutDown() {
-        return isShutDown;
     }
 
     @Override
     public void sendData(String data) {
-        Log.e(TAG, "SendData: " + data);
         outboundDataQueue.add(data);
     }
 
@@ -57,81 +47,65 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     @Override
     public void run() {
-        Log.d(TAG, "run() started");
-
-        try {
-            socket = new Socket(mHost, mPort);
-            mInputStream = socket.getInputStream();
-            mOutputStream = socket.getOutputStream();
-
+        while (!mStopped) {
             try {
-                Thread.sleep(3000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Attempt to connect to " + mHost + ":" + mPort);
+                socket = new Socket(mHost, mPort);
+                mInputStream = socket.getInputStream();
+                mOutputStream = socket.getOutputStream();
+
+                inThread = new Thread(new inboundConnection());
+                inThread.setName("SocketConnectionHandler inbound connection thread");
+
+                mOutThread = new Thread(new outboundConnection());
+                mOutThread.setName("SocketConnectionHandler outbound connection thread");
+
+                inThread.start();
+                mOutThread.start();
+
+                for (SocketListener listener : mListeners) {
+                    listener.onConnected();
+                }
+                break;
+            } catch (IOException e) {
+                try {
+                    Thread.sleep(RECONNECT_DELAY);
+                } catch (InterruptedException ex) {
+                    // Ignore
+                }
             }
+        }
 
-            for (SocketListener listener : mListeners) {
-                listener.onConnected();
-            }
-
-            inThread = new Thread(new inboundConnection());
-            inThread.setName("SocketConnectionHandler inbound connection thread");
-            inThread.setDaemon(true);
-
-            outThread = new Thread(new outboundConnection());
-            outThread.setName("SocketConnectionHandler outbound connection thread");
-            outThread.setDaemon(true);
-
-            inThread.start();
-            outThread.start();
-
-            Log.d(TAG, "inThread, outThread started");
-        } catch (Exception e) {
-            for (SocketListener listener : mListeners) {
-                listener.onConnectionFailed();
-            }
-            e.printStackTrace();
+        if (mStopped) {
+            return;
         }
     }
 
     @Override
     public void stop() {
-        Log.d(TAG, "stop() started");
-        synchronized (this) {
-            isShutDown = true;
-        }
-        if (outThread != null && !outThread.isInterrupted()) {
-            outThread.interrupt();
-        }
-        if (inThread != null && !inThread.isInterrupted()) {
-            inThread.interrupt();
-        }
+        mOutThread.interrupt();
+        inThread.interrupt();
+        Thread.currentThread().interrupt();
+        mStopped = true;
+
         if (socket != null && !socket.isClosed()) {
             try {
                 socket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                // Ignore
             }
         }
-        if (!Thread.currentThread().isInterrupted()) {
-            Thread.currentThread().interrupt();
-        }
-        Log.d(TAG, "stop() ended");
     }
 
     private class inboundConnection implements Runnable {
         public void run() {
-
             final byte[] buf = new byte[1024 * 64];
             while (!inThread.isInterrupted()) {
                 try {
                     int read = mInputStream.read(buf);
                     if (read > 0) {
                         String data = new String(Arrays.copyOf(buf, read), "UTF-8");
-
-                        // Например при регистрации отправляется сразу два json объекта и их нужно разделить
                         String[] dataStr = data.split("\\}\\{");
-
                         for (SocketListener listener : mListeners) {
                             if (dataStr.length == 1) {
                                 listener.onDataReceived(dataStr[0]);
@@ -147,12 +121,13 @@ public class SocketConnectionHandler implements ConnectionHandler {
                         }
                     }
                 } catch (Exception e) {
+                    Log.e(TAG, "Failed to handle inboundConnection: " + e.getMessage());
                     for (SocketListener listener : mListeners) {
                         listener.onConnectionFailed();
                     }
-                    Log.d(TAG, "Failed to handle inboundConnection");
-                    e.printStackTrace();
-                    stop();
+                    mOutThread.interrupt();
+                    inThread.interrupt();
+                    Thread.currentThread().interrupt();
                 }
             }
         }
@@ -160,21 +135,21 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     private class outboundConnection implements Runnable {
         public void run() {
-            while (!outThread.isInterrupted()) {
+            while (!mOutThread.isInterrupted()) {
                 try {
                     String data = outboundDataQueue.take();
                     if (data != null) {
-                        Log.e(TAG, "NEW SEND DATA: " + data);
                         mOutputStream.write(data.getBytes("UTF-8"));
                         mOutputStream.flush();
                     }
                 } catch (Exception e) {
+                    Log.e(TAG, "Failed to handle outboundConnection: " + e.getMessage());
                     for (SocketListener listener : mListeners) {
                         listener.onConnectionFailed();
                     }
-                    Log.d(TAG, "Failed to handle inboundConnection");
-                    e.printStackTrace();
-                    stop();
+                    mOutThread.interrupt();
+                    inThread.interrupt();
+                    Thread.currentThread().interrupt();
                 }
             }
         }

@@ -1,7 +1,5 @@
 package ru.mail.ruslan.androidchatclient.serialization;
 
-import android.util.Log;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -49,7 +47,6 @@ public class JsonProtocol implements Protocol {
     @Override
     public String encode(BaseMessage msg) throws ProtocolException {
         // builder
-        Log.d(TAG, "Build message for action: " + msg.getAction());
 
         JsonObject json = new JsonObject();
         JsonObject data = new JsonObject();
@@ -148,7 +145,6 @@ public class JsonProtocol implements Protocol {
         JsonObject data = null;
 
         if (json.has("data")) {
-            Log.e(TAG, "json.has(\"data\")");
             data = json.get("data").getAsJsonObject();
         }
 
@@ -282,7 +278,6 @@ public class JsonProtocol implements Protocol {
                 );
             }
             case Action.WELCOME: {
-                Log.e(TAG, "Action.Welcome");
                 return new WelcomeMessage(
                         json.get("message").getAsString(),
                         json.get("time").getAsLong()
