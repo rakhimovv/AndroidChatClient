@@ -2,13 +2,10 @@ package ru.mail.ruslan.androidchatclient;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import ru.mail.ruslan.androidchatclient.encryption.HashUtil;
 import ru.mail.ruslan.androidchatclient.msg.Action;
@@ -18,7 +15,6 @@ import ru.mail.ruslan.androidchatclient.msg.request.AuthRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.ChannelListRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.RegisterRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.AuthResponseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.Channel;
 import ru.mail.ruslan.androidchatclient.msg.response.ChannelListResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.RegisterResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.WelcomeMessage;
@@ -28,10 +24,12 @@ public final class Controller {
     private static final String TAG = "Controller";
 
     private WeakReference<MainActivity> mMainActivityWeakRef;
+    public FragmentReplacer fragmentReplacer;
     public SharedPreferences mPrefs;
 
     public Controller(MainActivity mainActivity) {
         mMainActivityWeakRef = new WeakReference<>(mainActivity);
+        fragmentReplacer = new FragmentReplacer(mMainActivityWeakRef, this);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(mainActivity);
     }
 
@@ -80,16 +78,6 @@ public final class Controller {
         }
     }
 
-    private void replaceFragment(MainActivity mainActivity, Fragment fragment,
-                                 String tag, boolean addToBackStack) {
-        FragmentTransaction ft = mainActivity.getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.fragment_container, fragment, tag);
-        if (addToBackStack) {
-            ft.addToBackStack(null);
-        }
-        ft.commit();
-    }
-
     private void processWelcomeMessage(WelcomeMessage message) {
         MainActivity mainActivity = mMainActivityWeakRef.get();
         if (mainActivity == null) {
@@ -101,7 +89,7 @@ public final class Controller {
             authRequestMessage.pass = MyPreferences.loadPass(mPrefs);
             mainActivity.sendMessage(authRequestMessage);
         } else {
-            showAuthFragment(false);
+            fragmentReplacer.showAuthFragment(false);
         }
     }
 
@@ -234,7 +222,7 @@ public final class Controller {
         switch (message.status) {
             case ERR_OK: {
                 Log.d(TAG, "Successful getting channel list");
-                showChannelListFragment(message.channels, false);
+                fragmentReplacer.showChannelListFragment(message.channels, false);
                 break;
             }
             case ERR_ALREADY_EXIST: {
@@ -253,11 +241,11 @@ public final class Controller {
                 break;
             }
             case ERR_NEED_AUTH: {
-                showAuthFragment(false);
+                fragmentReplacer.showAuthFragment(false);
                 break;
             }
             case ERR_NEED_REGISTER: {
-                showAuthFragment(false);
+                fragmentReplacer.showAuthFragment(false);
                 break;
             }
             case ERR_USER_NOT_FOUND: {
@@ -278,7 +266,7 @@ public final class Controller {
             return;
         }
 
-        showSplashFragment(false);
+        fragmentReplacer.showSplashFragment(false);
         mainActivity.connectToRemoteService();
     }
 
@@ -327,39 +315,5 @@ public final class Controller {
         mainActivity.sendMessage(channelListMessage);
     }
 
-    public void showSplashFragment(boolean addToBackStack) {
-        MainActivity mainActivity = mMainActivityWeakRef.get();
-        if (mainActivity == null) {
-            return;
-        }
-        replaceFragment(mainActivity, new SplashFragment(),
-                SplashFragment.TAG, addToBackStack);
-    }
 
-    public void showAuthFragment(boolean addToBackStack) {
-        MainActivity mainActivity = mMainActivityWeakRef.get();
-        if (mainActivity == null) {
-            return;
-        }
-        replaceFragment(mainActivity, AuthFragment.newInstance(this),
-                AuthFragment.TAG, addToBackStack);
-    }
-
-    public void showChannelListFragment(List<Channel> channels, boolean addToBackStack) {
-        MainActivity mainActivity = mMainActivityWeakRef.get();
-        if (mainActivity == null) {
-            return;
-        }
-        replaceFragment(mainActivity, ChannelListFragment.newInstance(this, channels),
-                ChannelListFragment.TAG, addToBackStack);
-    }
-
-    public void showChannelFragment(Channel channel, boolean addToBackStack) {
-        MainActivity mainActivity = mMainActivityWeakRef.get();
-        if (mainActivity == null) {
-            return;
-        }
-        replaceFragment(mainActivity, ChannelFragment.newInstance(this, channel),
-                ChannelFragment.TAG, addToBackStack);
-    }
 }

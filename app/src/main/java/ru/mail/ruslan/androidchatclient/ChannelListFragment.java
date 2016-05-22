@@ -79,6 +79,6 @@ public class ChannelListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Channel channel = mAdapter.getItem(position);
-        mController.showChannelFragment(channel, true);
+        mController.fragmentReplacer.showChannelFragment(channel, true);
     }
 }
