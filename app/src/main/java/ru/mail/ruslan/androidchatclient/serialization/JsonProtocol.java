@@ -2,7 +2,9 @@ package ru.mail.ruslan.androidchatclient.serialization;
 
 import android.util.Log;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.net.ProtocolException;
 import java.util.ArrayList;
@@ -10,8 +12,30 @@ import java.util.List;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
-import ru.mail.ruslan.androidchatclient.msg.response.*;
-import ru.mail.ruslan.androidchatclient.msg.request.*;
+import ru.mail.ruslan.androidchatclient.msg.request.AuthRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.ChannelListRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.CreateChannelRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.EnterRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.LeaveRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.RegisterRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.SendRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.SetUserInfoRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.UserInfoRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.AuthResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.Channel;
+import ru.mail.ruslan.androidchatclient.msg.response.ChannelListResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.CreateChannelResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.EnterEventMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.EnterResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.LastMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.LeaveEventMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.LeaveResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.MessageEventMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.RegisterResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.SetUserInfoResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.User;
+import ru.mail.ruslan.androidchatclient.msg.response.UserInfoResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.WelcomeMessage;
 
 public class JsonProtocol implements Protocol {
 
@@ -130,11 +154,19 @@ public class JsonProtocol implements Protocol {
 
         switch (action) {
             case Action.AUTH: {
+                String sid = null;
+                String uid = null;
+                if (data.has("sid")) {
+                    sid = data.get("sid").getAsString();
+                }
+                if (data.has("uid")) {
+                    uid = data.get("uid").getAsString();
+                }
                 return new AuthResponseMessage(
                         data.get("status").getAsInt(),
                         data.get("error").getAsString(),
-                        data.get("sid").getAsString(),
-                        data.get("uid").getAsString()
+                        sid,
+                        uid
                 );
             }
             case Action.CHANNEL_LIST: {

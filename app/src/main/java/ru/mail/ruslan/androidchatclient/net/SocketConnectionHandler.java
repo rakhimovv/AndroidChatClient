@@ -2,6 +2,8 @@ package ru.mail.ruslan.androidchatclient.net;
 
 import android.util.Log;
 
+import com.google.gson.JsonParser;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,6 +28,7 @@ public class SocketConnectionHandler implements ConnectionHandler {
     private OutputStream mOutputStream;
     private Thread outThread;
     private Thread inThread;
+    private JsonParser jsonParser;
 
     SocketConnectionHandler(String host, int port) throws IOException {
         Log.d(TAG, "constructor started");
@@ -33,6 +36,7 @@ public class SocketConnectionHandler implements ConnectionHandler {
         mPort = port;
         isShutDown = false;
         outboundDataQueue = new LinkedBlockingQueue<>();
+        jsonParser = new JsonParser();
         Log.d(TAG, "constructor ended");
     }
 
@@ -124,8 +128,22 @@ public class SocketConnectionHandler implements ConnectionHandler {
                     int read = mInputStream.read(buf);
                     if (read > 0) {
                         String data = new String(Arrays.copyOf(buf, read), "UTF-8");
+
+                        // Например при регистрации отправляется сразу два json объекта и их нужно разделить
+                        String[] dataStr = data.split("\\}\\{");
+
                         for (SocketListener listener : mListeners) {
-                            listener.onDataReceived(data);
+                            if (dataStr.length == 1) {
+                                listener.onDataReceived(dataStr[0]);
+                            } else {
+                                for (int i = 0; i < dataStr.length; i++) {
+                                    if (i % 2 == 0) {
+                                        listener.onDataReceived(dataStr[i] + "}");
+                                    } else {
+                                        listener.onDataReceived("{" + dataStr[i]);
+                                    }
+                                }
+                            }
                         }
                     }
                 } catch (Exception e) {

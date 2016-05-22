@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.net.ProtocolException;
 
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private IRemoteService mRemoteService;
     private boolean mRemoteServiceConnectedToServer;
     private JsonProtocol mJsonProtocol;
+    private Controller mController;
 
     private ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
@@ -46,24 +48,26 @@ public class MainActivity extends AppCompatActivity {
             switch (intent.getAction()) {
                 case RemoteService.ACTION_CONNECTED: {
                     Log.d(TAG, "RemoteService is connected to Server");
+                    Toast.makeText(getApplicationContext(), "Connected to server", Toast.LENGTH_SHORT).show();
                     mRemoteServiceConnectedToServer = true;
                     break;
                 }
                 case RemoteService.ACTION_CONNECTION_FAILED: {
                     Log.d(TAG, "RemoteService's connection to Server failed");
+                    Toast.makeText(getApplicationContext(), "Connection to server failed", Toast.LENGTH_SHORT).show();
+
                     mRemoteServiceConnectedToServer = false;
                     //mController.processConnectionFailed();
-                    //Toast.makeText(getApplicationContext(), R.string.toast_connection_failed, Toast.LENGTH_SHORT).show();
                     break;
                 }
                 case RemoteService.ACTION_DATA_RECEIVED: {
                     String data = intent.getStringExtra("data");
                     Log.e(TAG, "Message received: " + data);
-                    //BaseMessage message = mMessageParser.parseMessage(data);
+                    Toast.makeText(getApplicationContext(), data, Toast.LENGTH_SHORT).show();
                     try {
                         BaseMessage message = mJsonProtocol.decode(data);
                         if (message != null) {
-                            //mController.processResponse(message);
+                            mController.processResponse(message);
                         } else {
                             Log.e(TAG, "Message is null");
                             mRemoteServiceConnectedToServer = false;
@@ -84,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mJsonProtocol = new JsonProtocol();
-        //mController = new Controller(this);
+        mController = new Controller(this);
 
         if (savedInstanceState == null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -157,6 +161,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         disconnect();
+        //mController.mPrefs
+        MyPreferences.deleteAuthData(mController.mPrefs);
+        Log.e(TAG, "deleteAuthData");
         super.onStop();
     }
 }
