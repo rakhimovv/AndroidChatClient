@@ -128,8 +128,6 @@ public class SocketConnectionHandler implements ConnectionHandler {
                             listener.onDataReceived(data);
                         }
                     }
-
-
                 } catch (Exception e) {
                     for (SocketListener listener : mListeners) {
                         listener.onConnectionFailed();
@@ -152,8 +150,6 @@ public class SocketConnectionHandler implements ConnectionHandler {
                         mOutputStream.write(data.getBytes("UTF-8"));
                         mOutputStream.flush();
                     }
-                } catch (InterruptedException i) {
-                    outThread.interrupt();
                 } catch (Exception e) {
                     for (SocketListener listener : mListeners) {
                         listener.onConnectionFailed();

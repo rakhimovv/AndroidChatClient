@@ -27,7 +27,10 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".net.MyService" android:enabled="true" android:exported="false"/>
+        <service
+            android:name=".net.RemoteService"
+            android:enabled="true"
+            android:exported="false" />
 
     </application>
 
