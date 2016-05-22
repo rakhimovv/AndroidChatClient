@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 /*{
     "action":"register",
@@ -60,5 +61,10 @@ public class RegisterRequestMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.REGISTER;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

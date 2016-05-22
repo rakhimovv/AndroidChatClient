@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 public class WelcomeMessage implements BaseMessage {
     public String message;
@@ -47,5 +48,10 @@ public class WelcomeMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.WELCOME;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

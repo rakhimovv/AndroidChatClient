@@ -62,4 +62,9 @@ public class EnterEventMessage implements BaseMessage {
     public String getAction() {
         return Action.EVENT_ENTER;
     }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
+    }
 }

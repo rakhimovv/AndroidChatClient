@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 /*{
     "action":"auth",
@@ -55,5 +56,10 @@ public class AuthRequestMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.AUTH;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

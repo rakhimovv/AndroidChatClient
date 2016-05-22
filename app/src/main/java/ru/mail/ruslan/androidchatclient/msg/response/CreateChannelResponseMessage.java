@@ -62,4 +62,9 @@ public class CreateChannelResponseMessage implements BaseMessage {
     public String getAction() {
         return Action.CREATE_CHANNEL;
     }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
 }

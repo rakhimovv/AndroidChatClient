@@ -16,9 +16,12 @@
     <string name="reconnect">Reconnect</string>
     <string name="toast_empty_login">Login is empty</string>
     <string name="toast_empty_pass">Password is empty</string>
+    <string name="toast_empty_login_or_pass_or_channel">Login or password or channel is empty</string>
     <string name="toast_login_already_exists">This login already exists</string>
-    <string name="toast_invalid_pass">Invalid password</string>
+    <string name="toast_invalid_login_or_pass">Invalid login or password</string>
+    <string name="toast_invalid_json">Invalid json</string>
     <string name="toast_need_register">Need to register</string>
+    <string name="toast_need_auth">Need to auth</string>
     <string name="toast_passwords_not_equals">Passwords are not equal</string>
     <string name="toast_empty_nickname">Nick is empty</string>
     <string name="online_users">Online users:</string>

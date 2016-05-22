@@ -68,4 +68,9 @@ public class AuthResponseMessage implements BaseMessage {
     public String getAction() {
         return Action.AUTH;
     }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
 }

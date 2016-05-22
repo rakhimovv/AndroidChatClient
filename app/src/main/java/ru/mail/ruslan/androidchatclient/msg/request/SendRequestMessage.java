@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 /*{
     "action":"message",
@@ -65,5 +66,10 @@ public class SendRequestMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.SEND_MESSAGE;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

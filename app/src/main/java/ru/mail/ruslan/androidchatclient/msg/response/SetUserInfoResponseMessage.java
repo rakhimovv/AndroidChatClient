@@ -57,4 +57,9 @@ public class SetUserInfoResponseMessage implements BaseMessage {
     public String getAction() {
         return Action.SET_USER_INFO;
     }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
 }

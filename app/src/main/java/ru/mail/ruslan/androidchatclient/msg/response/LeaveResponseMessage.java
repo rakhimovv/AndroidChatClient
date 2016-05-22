@@ -57,4 +57,9 @@ public class LeaveResponseMessage implements BaseMessage {
     public String getAction() {
         return Action.LEAVE;
     }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
 }

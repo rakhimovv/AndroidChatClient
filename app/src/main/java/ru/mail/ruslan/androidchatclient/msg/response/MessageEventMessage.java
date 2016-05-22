@@ -67,4 +67,9 @@ public class MessageEventMessage implements BaseMessage {
     public String getAction() {
         return Action.EVENT_MESSAGE;
     }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
+    }
 }

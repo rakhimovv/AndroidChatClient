@@ -57,4 +57,9 @@ public class RegisterResponseMessage implements BaseMessage {
     public String getAction() {
         return Action.REGISTER;
     }
+
+    @Override
+    public Status getStatus() {
+        return status;
+    }
 }

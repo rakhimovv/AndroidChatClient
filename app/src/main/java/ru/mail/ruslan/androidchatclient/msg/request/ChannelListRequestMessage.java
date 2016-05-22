@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 /*{
     "action":"channellist",
@@ -55,5 +56,10 @@ public class ChannelListRequestMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.CHANNEL_LIST;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

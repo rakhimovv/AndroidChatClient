@@ -62,4 +62,9 @@ public class LeaveEventMessage implements BaseMessage {
     public String getAction() {
         return Action.EVENT_LEAVE;
     }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
+    }
 }

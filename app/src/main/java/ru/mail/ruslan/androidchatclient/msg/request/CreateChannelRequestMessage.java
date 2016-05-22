@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 /*{
     "action":"createchannel",
@@ -65,5 +66,10 @@ public class CreateChannelRequestMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.CREATE_CHANNEL;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

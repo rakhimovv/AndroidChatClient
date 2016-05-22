@@ -4,6 +4,7 @@ import android.os.Parcel;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
+import ru.mail.ruslan.androidchatclient.msg.Status;
 
 /*{
     "action":"setuserinfo",
@@ -60,5 +61,10 @@ public class SetUserInfoRequestMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.SET_USER_INFO;
+    }
+
+    @Override
+    public Status getStatus() {
+        return Status.NO_STATUS;
     }
 }

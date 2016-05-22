@@ -11,5 +11,6 @@ public enum Status {
     ERR_NEED_REGISTER,      // 7, Нужна регистрация
     ERR_USER_NOT_FOUND,     // 8, По указанному UserId не найден пользователь
     ERR_CHANNEL_NOT_FOUND,  // 9, Не найден канал по ID
-    ERR_INVALID_CHANNEL     // 10, Пользователь не в канале
+    ERR_INVALID_CHANNEL,    // 10, Пользователь не в канале
+    NO_STATUS               // 11, Сообщения без статуса
 }

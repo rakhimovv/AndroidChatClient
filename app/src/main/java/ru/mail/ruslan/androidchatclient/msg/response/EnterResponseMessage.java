@@ -2,12 +2,12 @@ package ru.mail.ruslan.androidchatclient.msg.response;
 
 import android.os.Parcel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
 import ru.mail.ruslan.androidchatclient.msg.Status;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /*{
     "action":"enter",
@@ -86,5 +86,10 @@ public class EnterResponseMessage implements BaseMessage {
     @Override
     public String getAction() {
         return Action.ENTER;
+    }
+
+    @Override
+    public Status getStatus() {
+        return status;
     }
 }
