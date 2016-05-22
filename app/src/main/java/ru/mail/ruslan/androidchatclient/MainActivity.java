@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.FragmentTransaction;
@@ -79,17 +81,28 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public boolean isInternetConnection() {
+        ConnectivityManager cm = (ConnectivityManager) this.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mJsonProtocol = new JsonProtocol();
-        mController = new Controller(this);
 
         if (savedInstanceState == null) {
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.replace(R.id.fragment_container, new SplashFragment(), SplashFragment.TAG);
             ft.commit();
+        }
+
+        if (isInternetConnection()) {
+            mJsonProtocol = new JsonProtocol();
+            mController = new Controller(this);
+        } else {
+            Toast.makeText(this.getApplicationContext(), "Internet connection is absent", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -138,12 +151,15 @@ public class MainActivity extends AppCompatActivity {
         manager.registerReceiver(mRemoteServiceReceiver, new IntentFilter(RemoteService.ACTION_CONNECTED));
         manager.registerReceiver(mRemoteServiceReceiver, new IntentFilter(RemoteService.ACTION_CONNECTION_FAILED));
         manager.registerReceiver(mRemoteServiceReceiver, new IntentFilter(RemoteService.ACTION_DATA_RECEIVED));
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        connectToRemoteService();
+        if (isInternetConnection()) {
+            connectToRemoteService();
+        }
     }
 
     @Override
@@ -155,8 +171,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         disconnect();
-        MyPreferences.deleteAuthData(mController.mPrefs);
-        Log.e(TAG, "onStop(): Delete Auth Data");
+        if (mController != null) {
+            MyPreferences.deleteAuthData(mController.mPrefs);
+            Log.e(TAG, "onStop(): Delete Auth Data");
+        }
         super.onStop();
     }
 }
