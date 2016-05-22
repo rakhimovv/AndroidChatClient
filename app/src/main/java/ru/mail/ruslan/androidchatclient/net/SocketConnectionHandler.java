@@ -75,10 +75,6 @@ public class SocketConnectionHandler implements ConnectionHandler {
                 }
             }
         }
-
-        if (mStopped) {
-            return;
-        }
     }
 
     @Override
@@ -100,7 +96,7 @@ public class SocketConnectionHandler implements ConnectionHandler {
     private class inboundConnection implements Runnable {
         public void run() {
             final byte[] buf = new byte[1024 * 64];
-            while (!inThread.isInterrupted()) {
+            while (!mStopped && !inThread.isInterrupted()) {
                 try {
                     int read = mInputStream.read(buf);
                     if (read > 0) {
@@ -135,7 +131,7 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     private class outboundConnection implements Runnable {
         public void run() {
-            while (!mOutThread.isInterrupted()) {
+            while (!mStopped && !mOutThread.isInterrupted()) {
                 try {
                     String data = outboundDataQueue.take();
                     if (data != null) {
