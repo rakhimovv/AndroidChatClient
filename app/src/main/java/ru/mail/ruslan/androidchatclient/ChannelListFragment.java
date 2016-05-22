@@ -19,6 +19,8 @@ import ru.mail.ruslan.androidchatclient.msg.adapter.ChannelListAdapter;
 import ru.mail.ruslan.androidchatclient.msg.response.Channel;
 
 public class ChannelListFragment extends ListFragment {
+    public static final String TAG = "AuthFragment";
+
     private Controller mController;
     private List<Channel> mChannels;
     private ChannelListAdapter mAdapter;
@@ -78,9 +80,5 @@ public class ChannelListFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         Channel channel = mAdapter.getItem(position);
         mController.showChannelFragment(channel, true);
-    }
-
-    public static String tag() {
-        return ChannelListFragment.class.getSimpleName();
     }
 }

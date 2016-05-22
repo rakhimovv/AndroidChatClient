@@ -351,7 +351,7 @@ public final class Controller {
             return;
         }
         replaceFragment(mainActivity, ChannelListFragment.newInstance(this, channels),
-                ChannelListFragment.tag(), addToBackStack);
+                ChannelListFragment.TAG, addToBackStack);
     }
 
     public void showChannelFragment(Channel channel, boolean addToBackStack) {
@@ -360,6 +360,6 @@ public final class Controller {
             return;
         }
         replaceFragment(mainActivity, ChannelFragment.newInstance(this, channel),
-                ChannelFragment.tag(), addToBackStack);
+                ChannelFragment.TAG, addToBackStack);
     }
 }

@@ -11,11 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-/**
- * Created by Ruslan on 22/05/16.
- */
 public class AuthFragment extends Fragment {
-    public static final String TAG = "SplashFragment";
+    public static final String TAG = "AuthFragment";
 
     private Controller mController;
     private AutoCompleteTextView mLogin;

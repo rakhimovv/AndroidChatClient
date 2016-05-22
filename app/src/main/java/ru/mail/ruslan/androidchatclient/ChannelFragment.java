@@ -13,6 +13,8 @@ import android.widget.ListView;
 import ru.mail.ruslan.androidchatclient.msg.response.Channel;
 
 public class ChannelFragment extends ListFragment {
+    public static final String TAG = "AuthFragment";
+
     private Channel mChannel;
     private Controller mController;
     private EditText mMessage;
@@ -49,9 +51,5 @@ public class ChannelFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
 
-    }
-
-    public static String tag() {
-        return ChannelFragment.class.getSimpleName();
     }
 }
