@@ -7,6 +7,8 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 
 import ru.mail.ruslan.androidchatclient.msg.response.Channel;
+import ru.mail.ruslan.androidchatclient.msg.response.LastMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.User;
 
 public class FragmentReplacer {
     private WeakReference<MainActivity> mMainActivityWeakRef;
@@ -44,21 +46,38 @@ public class FragmentReplacer {
                 AuthFragment.TAG, addToBackStack);
     }
 
-    public void showChannelListFragment(List<Channel> channels, boolean addToBackStack) {
+    public void showChannelListFragment(List<Channel> channels, String userId, String sessionId, boolean addToBackStack) {
         MainActivity mainActivity = mMainActivityWeakRef.get();
         if (mainActivity == null) {
             return;
         }
-        replaceFragment(mainActivity, ChannelListFragment.newInstance(controller, channels),
+        //String userId = MyPreferences.loadUserId(mPrefs);
+        //String sessionId = MyPreferences.loadSessionId(mPrefs);
+        replaceFragment(mainActivity, ChannelListFragment.newInstance(controller, userId, sessionId, channels),
                 ChannelListFragment.TAG, addToBackStack);
     }
 
-    public void showChannelFragment(Channel channel, boolean addToBackStack) {
+    public void showChannelFragment(List<User> users,
+                                    List<LastMessage> lastMessages,
+                                    String userId,
+                                    String sessionId,
+                                    String channelId,
+                                    boolean addToBackStack) {
         MainActivity mainActivity = mMainActivityWeakRef.get();
         if (mainActivity == null) {
             return;
         }
-        replaceFragment(mainActivity, ChannelFragment.newInstance(controller, channel),
-                ChannelFragment.TAG, addToBackStack);
+        replaceFragment(
+                mainActivity,
+                ChannelFragment.newInstance(
+                        controller,
+                        userId,
+                        sessionId,
+                        channelId,
+                        users,
+                        lastMessages
+                ),
+                ChannelFragment.TAG, addToBackStack
+        );
     }
 }

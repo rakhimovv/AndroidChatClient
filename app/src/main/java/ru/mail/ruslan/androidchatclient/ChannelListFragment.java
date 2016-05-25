@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.List;
 
@@ -22,15 +21,63 @@ public class ChannelListFragment extends ListFragment {
     public static final String TAG = "AuthFragment";
 
     private Controller mController;
+    private String mUserId;
+    private String mSessionId;
     private List<Channel> mChannels;
     private ChannelListAdapter mAdapter;
-    private TextView mNoConnectionStub;
+    //private Button mCreateChannelButton;
+    //private Button mProfileButton;
 
-    public static ChannelListFragment newInstance(Controller controller, List<Channel> channels) {
+    public static ChannelListFragment newInstance(Controller controller, String userId,
+                                                  String sessionId, List<Channel> channels) {
         ChannelListFragment fragment = new ChannelListFragment();
         fragment.mController = controller;
+        fragment.mUserId = userId;
+        fragment.mSessionId = sessionId;
         fragment.mChannels = channels;
         return fragment;
+    }
+
+    public void processEnterChannel(String userId, String channelId) {
+        for (Channel channel : mChannels) {
+            if (mUserId != null) {
+                if (channelId.equals(channel.chid)) {
+                    channel.online++;
+                    if (mUserId.equals(userId)) {
+                        channel.isEntered = true;
+                    }
+                }
+            } else {
+                if (channelId.equals(channel.chid)) {
+                    channel.online++;
+                    channel.isEntered = true;
+                }
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public void processLeaveChannel(String userId, String channelId) {
+        for (Channel channel : mChannels) {
+            if (mUserId != null) {
+                if (channelId.equals(channel.chid)) {
+                    if (channel.online > 0) {
+                        channel.online--;
+                    }
+                    if (mUserId.equals(userId)) {
+                        channel.isEntered = false;
+                    }
+                }
+            } else {
+                if (channelId.equals(channel.chid)) {
+                    if (channel.online > 0) {
+                        channel.online--;
+                    }
+                    channel.isEntered = false;
+                }
+            }
+        }
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
@@ -42,9 +89,9 @@ public class ChannelListFragment extends ListFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_channel_list, container, false);
-        mNoConnectionStub = (TextView) view.findViewById(R.id.no_connection_stub);
-        return view;
+        //View view = inflater.inflate(R.layout.fragment_channel_list, container, false);
+        //mNoConnectionStub = (TextView) view.findViewById(R.id.no_connection_stub);
+        return inflater.inflate(R.layout.fragment_channel_list, container, false);
     }
 
     @Override
@@ -52,7 +99,7 @@ public class ChannelListFragment extends ListFragment {
         super.onActivityCreated(savedInstanceState);
         mAdapter = new ChannelListAdapter(getActivity(), mChannels);
         setListAdapter(mAdapter);
-        //registerForContextMenu(getListView());
+        registerForContextMenu(getListView());
     }
 
     @Override
@@ -68,6 +115,9 @@ public class ChannelListFragment extends ListFragment {
         switch (item.getItemId()) {
             case R.id.leave_channel: {
                 Channel channel = mAdapter.getItem(info.position);
+                if (channel.isEntered) {
+                    mController.leaveChannel(channel, mUserId, mSessionId);
+                }
                 return true;
             }
             default: {
@@ -79,6 +129,6 @@ public class ChannelListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Channel channel = mAdapter.getItem(position);
-        mController.fragmentReplacer.showChannelFragment(channel, true);
+        mController.enterChannel(channel, mUserId, mSessionId);
     }
 }

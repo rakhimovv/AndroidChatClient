@@ -24,6 +24,8 @@
     <string name="toast_need_auth">Need to auth</string>
     <string name="toast_passwords_not_equals">Passwords are not equal</string>
     <string name="toast_empty_nickname">Nick is empty</string>
+    <string name="toast_unable_channel_enter">Unable_channel_enter</string>
+    <string name="channel_users">channel_users</string>
     <string name="online_users">Online users:</string>
     <string name="no_channels">No channels</string>
     <string name="no_messages">No messages</string>

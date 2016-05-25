@@ -14,4 +14,5 @@ public class Action {
     public static final String EVENT_LEAVE = "ev_leave";
     public static final String EVENT_MESSAGE = "ev_message";
     public static final String WELCOME = "welcome";
+    public static final String MESSAGE = "message";
 }

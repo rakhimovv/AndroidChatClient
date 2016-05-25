@@ -6,48 +6,39 @@ import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
 import ru.mail.ruslan.androidchatclient.msg.Status;
 
-
 /*{
-    "action":"auth",
+    "action":"message",
     "data":{
         "status":[0-9]+,
-        "error":"TEXT_OF_ERROR",
-        "sid":"SESSION_ID",
-        "cid":"USER_ID"
+        "error":"TEXT_OF_ERROR"
     }
 }*/
-public class AuthResponseMessage implements BaseMessage {
+public class MessageMessage implements BaseMessage {
     public Status status;
     public String error;
-    public String sid;  // session id
-    public String cid;  // user id
 
-    public AuthResponseMessage() {
+    public MessageMessage() {
     }
 
-    public AuthResponseMessage(int status, String error, String sid, String cid) {
+    public MessageMessage(int status, String error) {
         this.status = Status.values()[status];
         this.error = error;
-        this.sid = sid;
-        this.cid = cid;
     }
 
-    protected AuthResponseMessage(Parcel in) {
+    protected MessageMessage(Parcel in) {
         status = Status.values()[in.readInt()];
         error = in.readString();
-        sid = in.readString();
-        cid = in.readString();
     }
 
-    public static final Creator<AuthResponseMessage> CREATOR = new Creator<AuthResponseMessage>() {
+    public static final Creator<MessageMessage> CREATOR = new Creator<MessageMessage>() {
         @Override
-        public AuthResponseMessage createFromParcel(Parcel in) {
-            return new AuthResponseMessage(in);
+        public MessageMessage createFromParcel(Parcel in) {
+            return new MessageMessage(in);
         }
 
         @Override
-        public AuthResponseMessage[] newArray(int size) {
-            return new AuthResponseMessage[size];
+        public MessageMessage[] newArray(int size) {
+            return new MessageMessage[size];
         }
     };
 
@@ -60,13 +51,11 @@ public class AuthResponseMessage implements BaseMessage {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(status.ordinal());
         out.writeString(error);
-        out.writeString(sid);
-        out.writeString(cid);
     }
 
     @Override
     public String getAction() {
-        return Action.AUTH;
+        return Action.SET_USER_INFO;
     }
 
     @Override

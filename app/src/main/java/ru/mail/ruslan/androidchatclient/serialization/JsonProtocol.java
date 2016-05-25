@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 
 import java.net.ProtocolException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import ru.mail.ruslan.androidchatclient.msg.Action;
@@ -29,6 +31,7 @@ import ru.mail.ruslan.androidchatclient.msg.response.LastMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.LeaveEventMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.LeaveResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.MessageEventMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.MessageMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.RegisterResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.SetUserInfoResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.User;
@@ -151,18 +154,18 @@ public class JsonProtocol implements Protocol {
         switch (action) {
             case Action.AUTH: {
                 String sid = null;
-                String uid = null;
+                String cid = null;
                 if (data.has("sid")) {
                     sid = data.get("sid").getAsString();
                 }
-                if (data.has("uid")) {
-                    uid = data.get("uid").getAsString();
+                if (data.has("cid")) {
+                    cid = data.get("cid").getAsString();
                 }
                 return new AuthResponseMessage(
                         data.get("status").getAsInt(),
                         data.get("error").getAsString(),
                         sid,
-                        uid
+                        cid
                 );
             }
             case Action.CHANNEL_LIST: {
@@ -175,11 +178,20 @@ public class JsonProtocol implements Protocol {
                                 c.get("chid").getAsString(),
                                 c.get("name").getAsString(),
                                 c.get("descr").getAsString(),
-                                c.get("online").getAsInt()
+                                c.get("online").getAsInt(),
+                                false
                         );
                         channelList.add(channel);
                     }
                 }
+
+                Collections.sort(channelList, new Comparator<Channel>() {
+                    @Override
+                    public int compare(Channel lhs, Channel rhs) {
+                        return lhs.name.compareTo(rhs.name);
+                    }
+                });
+
                 return new ChannelListResponseMessage(
                         data.get("status").getAsInt(),
                         data.get("error").getAsString(),
@@ -265,6 +277,12 @@ public class JsonProtocol implements Protocol {
             }
             case Action.SET_USER_INFO: {
                 return new SetUserInfoResponseMessage(
+                        data.get("status").getAsInt(),
+                        data.get("error").getAsString()
+                );
+            }
+            case Action.MESSAGE: {
+                return new MessageMessage(
                         data.get("status").getAsInt(),
                         data.get("error").getAsString()
                 );

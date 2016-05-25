@@ -79,8 +79,12 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     @Override
     public void stop() {
-        mOutThread.interrupt();
-        inThread.interrupt();
+        if (mOutThread != null) {
+            mOutThread.interrupt();
+        }
+        if (inThread != null) {
+            inThread.interrupt();
+        }
         Thread.currentThread().interrupt();
         mStopped = true;
 
@@ -99,17 +103,20 @@ public class SocketConnectionHandler implements ConnectionHandler {
             while (!mStopped && !inThread.isInterrupted()) {
                 try {
                     int read = mInputStream.read(buf);
-                    if (read > 0) {
+                    if (read != -1) {
                         String data = new String(Arrays.copyOf(buf, read), "UTF-8");
                         String[] dataStr = data.split("\\}\\{");
                         for (SocketListener listener : mListeners) {
                             if (dataStr.length == 1) {
+                                //Log.e(TAG, "NEW DATA: " + dataStr[0]);
                                 listener.onDataReceived(dataStr[0]);
                             } else {
                                 for (int i = 0; i < dataStr.length; i++) {
                                     if (i % 2 == 0) {
+                                        //Log.e(TAG, "NEW DATA: " + dataStr[i] + "}");
                                         listener.onDataReceived(dataStr[i] + "}");
                                     } else {
+                                        //Log.e(TAG, "NEW DATA: " + "{" + dataStr[i]);
                                         listener.onDataReceived("{" + dataStr[i]);
                                     }
                                 }

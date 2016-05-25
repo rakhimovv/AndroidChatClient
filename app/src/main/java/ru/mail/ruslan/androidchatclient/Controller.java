@@ -2,6 +2,7 @@ package ru.mail.ruslan.androidchatclient;
 
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,9 +13,17 @@ import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.AuthRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.ChannelListRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.EnterRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.LeaveRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.RegisterRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.SendRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.AuthResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.Channel;
 import ru.mail.ruslan.androidchatclient.msg.response.ChannelListResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.ChannelMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.EnterEventMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.EnterResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.MessageEventMessage;
 
 public final class Controller {
 
@@ -23,6 +32,11 @@ public final class Controller {
     private WeakReference<MainActivity> mMainActivityWeakRef;
     public FragmentReplacer fragmentReplacer;
     public SharedPreferences mPrefs;
+
+    // FIXME This field needs because server don't send channel_id in enter response
+    private String mLastEnterChannelId;
+    // FIXME This field needs because server don't send channel_id in leave response
+    private String mLastLeaveChannelId;
 
     public Controller(MainActivity mainActivity) {
         mMainActivityWeakRef = new WeakReference<>(mainActivity);
@@ -118,32 +132,70 @@ public final class Controller {
         switch (message.getAction()) {
             case Action.AUTH: {
                 Log.e(TAG, "Successful authorization");
-                MyPreferences.saveUserId(mPrefs, ((AuthResponseMessage) message).uid);
+                MyPreferences.saveUserId(mPrefs, ((AuthResponseMessage) message).cid);
                 MyPreferences.saveSessionId(mPrefs, ((AuthResponseMessage) message).sid);
-                getChannelList(((AuthResponseMessage) message).uid, ((AuthResponseMessage) message).sid);
+                getChannelList(((AuthResponseMessage) message).cid, ((AuthResponseMessage) message).sid);
                 break;
             }
             case Action.CHANNEL_LIST: {
                 Log.d(TAG, "Successful getting channel list");
-                fragmentReplacer.showChannelListFragment(((ChannelListResponseMessage) message).channels, false);
+                fragmentReplacer.showChannelListFragment(
+                        ((ChannelListResponseMessage) message).channels,
+                        MyPreferences.loadUserId(mPrefs),
+                        MyPreferences.loadSessionId(mPrefs),
+                        false);
                 break;
             }
             case Action.CREATE_CHANNEL: {
                 break;
             }
             case Action.EVENT_ENTER: {
+                FragmentManager fm = mainActivity.getSupportFragmentManager();
+                ChannelListFragment channelListFragment =
+                        (ChannelListFragment) fm.findFragmentByTag(ChannelListFragment.TAG);
+                if (channelListFragment != null) {
+                    channelListFragment.processEnterChannel(((EnterEventMessage) message).uid, ((EnterEventMessage) message).chid);
+                }
                 break;
             }
             case Action.ENTER: {
+                fragmentReplacer.showChannelFragment(
+                        ((EnterResponseMessage) message).users,
+                        ((EnterResponseMessage) message).lastMsg,
+                        MyPreferences.loadUserId(mPrefs),
+                        MyPreferences.loadSessionId(mPrefs),
+                        mLastEnterChannelId,
+                        true);
                 break;
             }
             case Action.EVENT_LEAVE: {
+                FragmentManager fm = mainActivity.getSupportFragmentManager();
+                ChannelListFragment channelListFragment =
+                        (ChannelListFragment) fm.findFragmentByTag(ChannelListFragment.TAG);
+                if (channelListFragment != null) {
+                    channelListFragment.processLeaveChannel(((EnterEventMessage) message).uid, ((EnterEventMessage) message).chid);
+                }
                 break;
             }
             case Action.LEAVE: {
+                FragmentManager fm = mainActivity.getSupportFragmentManager();
+                ChannelListFragment channelListFragment =
+                        (ChannelListFragment) fm.findFragmentByTag(ChannelListFragment.TAG);
+                if (channelListFragment != null) {
+                    channelListFragment.processLeaveChannel(MyPreferences.loadUserId(mPrefs), mLastLeaveChannelId);
+                }
                 break;
             }
             case Action.EVENT_MESSAGE: {
+                //Log.e(TAG, "ОБРАБАТЫВАЕМ СООБЩЕНИЕ");
+                Log.e(TAG, "Process message event (" + ((MessageEventMessage) message).chid + "): " + ((MessageEventMessage) message).body);
+
+                FragmentManager fm = mainActivity.getSupportFragmentManager();
+                ChannelFragment channelFragment =
+                        (ChannelFragment) fm.findFragmentByTag(ChannelFragment.TAG);
+                if (channelFragment != null) {
+                    channelFragment.processMessage(((MessageEventMessage) message).chid, new ChannelMessage((MessageEventMessage) message));
+                }
                 break;
             }
             case Action.REGISTER: {
@@ -159,6 +211,7 @@ public final class Controller {
                 break;
             }
             case Action.WELCOME: {
+                MyPreferences.deleteAuthData(mPrefs);
                 if (MyPreferences.isLoggedIn(mPrefs)) {
                     AuthRequestMessage authRequestMessage = new AuthRequestMessage();
                     authRequestMessage.login = MyPreferences.loadLogin(mPrefs);
@@ -215,5 +268,70 @@ public final class Controller {
         channelListMessage.cid = userId;
         channelListMessage.sid = sessionId;
         mainActivity.sendMessage(channelListMessage);
+    }
+
+    public void enterChannel(Channel channel, String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        if (userId == null || sessionId == null || channel == null) {
+            Toast.makeText(mainActivity.getApplicationContext(),
+                    R.string.toast_unable_channel_enter, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        //showLoadingDialog();
+
+        mLastEnterChannelId = channel.chid;
+
+        EnterRequestMessage enterMessage = new EnterRequestMessage();
+        enterMessage.cid = userId;
+        enterMessage.sid = sessionId;
+        enterMessage.channel = channel.chid;
+        mainActivity.sendMessage(enterMessage);
+    }
+
+    public void leaveChannel(Channel channel, String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        mLastLeaveChannelId = channel.chid;
+
+        LeaveRequestMessage leaveMessage = new LeaveRequestMessage();
+        leaveMessage.cid = userId;
+        leaveMessage.sid = sessionId;
+        leaveMessage.channel = channel.chid;
+        mainActivity.sendMessage(leaveMessage);
+    }
+
+    public void leaveAllChannels(String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        LeaveRequestMessage leaveMessage = new LeaveRequestMessage();
+        leaveMessage.cid = userId;
+        leaveMessage.sid = sessionId;
+        leaveMessage.channel = "*";
+        mainActivity.sendMessage(leaveMessage);
+    }
+
+    public void send(String body, String channel, String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        SendRequestMessage sendMessage = new SendRequestMessage();
+        sendMessage.body = body;
+        sendMessage.channel = channel;
+        sendMessage.cid = userId;
+        sendMessage.sid = sessionId;
+        mainActivity.sendMessage(sendMessage);
     }
 }
