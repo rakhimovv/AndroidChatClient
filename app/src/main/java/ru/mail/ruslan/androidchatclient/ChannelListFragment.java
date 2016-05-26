@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 
 import java.util.List;
@@ -18,15 +19,15 @@ import ru.mail.ruslan.androidchatclient.msg.adapter.ChannelListAdapter;
 import ru.mail.ruslan.androidchatclient.msg.response.Channel;
 
 public class ChannelListFragment extends ListFragment {
-    public static final String TAG = "AuthFragment";
+    public static final String TAG = "ChannelListFragment";
 
     private Controller mController;
     private String mUserId;
     private String mSessionId;
     private List<Channel> mChannels;
     private ChannelListAdapter mAdapter;
-    //private Button mCreateChannelButton;
-    //private Button mProfileButton;
+    private Button mCreateChannelButton;
+    private Button mProfileButton;
 
     public static ChannelListFragment newInstance(Controller controller, String userId,
                                                   String sessionId, List<Channel> channels) {
@@ -89,9 +90,24 @@ public class ChannelListFragment extends ListFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //View view = inflater.inflate(R.layout.fragment_channel_list, container, false);
-        //mNoConnectionStub = (TextView) view.findViewById(R.id.no_connection_stub);
-        return inflater.inflate(R.layout.fragment_channel_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_channel_list, container, false);
+        mCreateChannelButton = (Button) view.findViewById(R.id.btn_create_channel);
+        mProfileButton = (Button) view.findViewById(R.id.btn_profile);
+
+        mCreateChannelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mController.fragmentReplacer.showCreateChannelFragment(true);
+            }
+        });
+
+        mProfileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mController.fragmentReplacer.showChangeUserInfoFragment(true);
+            }
+        });
+        return view;
     }
 
     @Override

@@ -21,8 +21,6 @@ import ru.mail.ruslan.androidchatclient.msg.response.User;
 
 public class ChannelFragment extends ListFragment {
 
-    public static final String TAG = "ChannelFragment";
-
     private Controller mController;
     private String mUserId;
     private String mSessionId;
@@ -73,7 +71,7 @@ public class ChannelFragment extends ListFragment {
         mChannelUsersButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //mController.showUserListFragment(mChannelUsers, true);
+                mController.fragmentReplacer.showUserListFragment(mChannelUsers, true);
             }
         });
 
@@ -101,9 +99,9 @@ public class ChannelFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         ChannelMessage message = mAdapter.getItem(position);
         if (mUserId.equals(message.from)) {
-            //mController.showChangeUserInfoFragment(true);
+            mController.fragmentReplacer.showChangeUserInfoFragment(true);
         } else {
-            //mController.getUserInfo(message.from, mUserId, mSessionId);
+            mController.getUserInfo(message.from, mUserId, mSessionId);
         }
     }
 

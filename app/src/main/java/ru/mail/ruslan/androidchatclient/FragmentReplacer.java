@@ -51,8 +51,6 @@ public class FragmentReplacer {
         if (mainActivity == null) {
             return;
         }
-        //String userId = MyPreferences.loadUserId(mPrefs);
-        //String sessionId = MyPreferences.loadSessionId(mPrefs);
         replaceFragment(mainActivity, ChannelListFragment.newInstance(controller, userId, sessionId, channels),
                 ChannelListFragment.TAG, addToBackStack);
     }
@@ -77,7 +75,59 @@ public class FragmentReplacer {
                         users,
                         lastMessages
                 ),
-                ChannelFragment.TAG, addToBackStack
+                ChannelFragment.tag(channelId),
+                addToBackStack
         );
+    }
+
+    public void showChangeUserInfoFragment(boolean addToBackStack) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        String userId = MyPreferences.loadUserId(controller.mPrefs);
+        String sessionId = MyPreferences.loadSessionId(controller.mPrefs);
+        String login = MyPreferences.loadLogin(controller.mPrefs);
+        replaceFragment(mainActivity, ChangeInfoFragment.newInstance(controller, userId, sessionId, login),
+                ChangeInfoFragment.tag(), addToBackStack);
+    }
+
+    public void showCreateChannelFragment(boolean addToBackStack) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        String userId = MyPreferences.loadUserId(controller.mPrefs);
+        String sessionId = MyPreferences.loadSessionId(controller.mPrefs);
+        replaceFragment(mainActivity, CreateChannelFragment.newInstance(controller, userId, sessionId),
+                CreateChannelFragment.tag(), addToBackStack);
+    }
+
+    public void showUserListFragment(List<User> users,
+                                     boolean addToBackStack) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        String userId = MyPreferences.loadUserId(controller.mPrefs);
+        String sessionId = MyPreferences.loadSessionId(controller.mPrefs);
+        replaceFragment(mainActivity, UserListFragment.newInstance(controller,
+                        userId, sessionId, users),
+                UserListFragment.tag(), addToBackStack);
+    }
+
+    public void showUserInfoFragment(String nickname,
+                                     String status,
+                                     boolean addToBackStack) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        replaceFragment(mainActivity, UserInfoFragment.newInstance(nickname, status),
+                UserInfoFragment.tag(), addToBackStack);
     }
 }

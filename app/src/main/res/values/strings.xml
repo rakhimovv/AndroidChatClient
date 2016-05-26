@@ -3,6 +3,7 @@
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
+    <string name="nickname">Nickname</string>
     <string name="prompt_password">Password</string>
     <string name="action_register">Register</string>
     <string name="action_sign_in">Sign in</string>
@@ -16,21 +17,36 @@
     <string name="reconnect">Reconnect</string>
     <string name="toast_empty_login">Login is empty</string>
     <string name="toast_empty_pass">Password is empty</string>
+    <string name="toast_channel_created">Channel was successfully created</string>
+    <string name="toast_info_changed">Information was changed</string>
+    <string name="successfull_register">Успешная регистрация</string>
     <string name="toast_empty_login_or_pass_or_channel">Login or password or channel is empty</string>
     <string name="toast_login_already_exists">This login already exists</string>
     <string name="toast_invalid_login_or_pass">Invalid login or password</string>
     <string name="toast_invalid_json">Invalid json</string>
     <string name="toast_need_register">Need to register</string>
     <string name="toast_need_auth">Need to auth</string>
+    <string name="toast_user_not_found">User not found</string>
+    <string name="toast_user_out_of_channel">User out of channel</string>
+    <string name="toast_channel_not_found">Channel not found</string>
     <string name="toast_passwords_not_equals">Passwords are not equal</string>
     <string name="toast_empty_nickname">Nick is empty</string>
     <string name="toast_unable_channel_enter">Unable_channel_enter</string>
+    <string name="toast_empty_channel_name">Empty channel name</string>
+    <string name="toast_empty_status">Empty status</string>
     <string name="channel_users">channel_users</string>
     <string name="online_users">Online users:</string>
     <string name="no_channels">No channels</string>
     <string name="no_messages">No messages</string>
     <string name="hint_message">Send message</string>
     <string name="no_connection">No connection</string>
+    <string name="create_channel">Create channel</string>
+    <string name="profile">Profile</string>
     <string name="leave_channel">Leave channel</string>
+    <string name="login">Login</string>
+    <string name="status">Status</string>
+    <string name="save">Save</string>
+    <string name="channel_name">Channel name</string>
+    <string name="channel_description">Channel description</string>
     <string name="loading_data" tools:ignore="TypographyEllipsis">Loading data...</string>
 </resources>

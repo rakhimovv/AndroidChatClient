@@ -145,8 +145,9 @@ public class JsonProtocol implements Protocol {
 
         String action = json.get("action").getAsString();
 
-        JsonObject data = null;
+        JsonObject data = json.get("data").getAsJsonObject();//null;
 
+        
         if (json.has("data")) {
             data = json.get("data").getAsJsonObject();
         }

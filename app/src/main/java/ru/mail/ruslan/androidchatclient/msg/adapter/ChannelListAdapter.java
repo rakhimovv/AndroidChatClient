@@ -1,6 +1,7 @@
 package ru.mail.ruslan.androidchatclient.msg.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,12 @@ public class ChannelListAdapter extends ArrayAdapter<Channel> {
         holder.title.setText(channel.name);
         holder.onlineUsers.setText(Integer.toString(channel.online));
         holder.description.setText(channel.descr);
+
+        if (channel.isEntered) {
+            convertView.setBackgroundResource(R.color.colorEnteredChannel);
+        } else {
+            convertView.setBackgroundColor(Color.TRANSPARENT);
+        }
 
         return convertView;
     }

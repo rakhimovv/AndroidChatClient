@@ -13,17 +13,22 @@ import ru.mail.ruslan.androidchatclient.msg.Action;
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.AuthRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.ChannelListRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.CreateChannelRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.EnterRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.LeaveRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.RegisterRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.request.SendRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.SetUserInfoRequestMessage;
+import ru.mail.ruslan.androidchatclient.msg.request.UserInfoRequestMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.AuthResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.Channel;
 import ru.mail.ruslan.androidchatclient.msg.response.ChannelListResponseMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.ChannelMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.EnterEventMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.EnterResponseMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.LeaveEventMessage;
 import ru.mail.ruslan.androidchatclient.msg.response.MessageEventMessage;
+import ru.mail.ruslan.androidchatclient.msg.response.UserInfoResponseMessage;
 
 public final class Controller {
 
@@ -113,32 +118,35 @@ public final class Controller {
                 return;
             }
             case ERR_USER_NOT_FOUND: {
+                Toast.makeText(mainActivity.getApplicationContext(),
+                        R.string.toast_user_not_found, Toast.LENGTH_SHORT).show();
                 mainActivity.connectToRemoteService();
                 return;
             }
             case ERR_CHANNEL_NOT_FOUND: {
+                Toast.makeText(mainActivity.getApplicationContext(),
+                        R.string.toast_channel_not_found, Toast.LENGTH_SHORT).show();
                 mainActivity.connectToRemoteService();
                 return;
             }
             case ERR_INVALID_CHANNEL: {
+                Toast.makeText(mainActivity.getApplicationContext(),
+                        R.string.toast_user_out_of_channel, Toast.LENGTH_SHORT).show();
                 mainActivity.connectToRemoteService();
                 return;
             }
         }
 
-        // Ошибки обработаны ранее
-        Log.e(TAG, "No errors");
-
         switch (message.getAction()) {
             case Action.AUTH: {
-                Log.e(TAG, "Successful authorization");
+                //Log.e(TAG, "Successful authorization");
                 MyPreferences.saveUserId(mPrefs, ((AuthResponseMessage) message).cid);
                 MyPreferences.saveSessionId(mPrefs, ((AuthResponseMessage) message).sid);
                 getChannelList(((AuthResponseMessage) message).cid, ((AuthResponseMessage) message).sid);
                 break;
             }
             case Action.CHANNEL_LIST: {
-                Log.d(TAG, "Successful getting channel list");
+                //Log.d(TAG, "Successful getting channel list");
                 fragmentReplacer.showChannelListFragment(
                         ((ChannelListResponseMessage) message).channels,
                         MyPreferences.loadUserId(mPrefs),
@@ -147,6 +155,11 @@ public final class Controller {
                 break;
             }
             case Action.CREATE_CHANNEL: {
+                //Logger.d("Successful create channel");
+                Toast.makeText(mainActivity, R.string.toast_channel_created, Toast.LENGTH_SHORT).show();
+                String userId = MyPreferences.loadUserId(mPrefs);
+                String sessionId = MyPreferences.loadSessionId(mPrefs);
+                getChannelList(userId, sessionId);
                 break;
             }
             case Action.EVENT_ENTER: {
@@ -173,7 +186,7 @@ public final class Controller {
                 ChannelListFragment channelListFragment =
                         (ChannelListFragment) fm.findFragmentByTag(ChannelListFragment.TAG);
                 if (channelListFragment != null) {
-                    channelListFragment.processLeaveChannel(((EnterEventMessage) message).uid, ((EnterEventMessage) message).chid);
+                    channelListFragment.processLeaveChannel(((LeaveEventMessage) message).uid, ((LeaveEventMessage) message).chid);
                 }
                 break;
             }
@@ -192,7 +205,7 @@ public final class Controller {
 
                 FragmentManager fm = mainActivity.getSupportFragmentManager();
                 ChannelFragment channelFragment =
-                        (ChannelFragment) fm.findFragmentByTag(ChannelFragment.TAG);
+                        (ChannelFragment) fm.findFragmentByTag(ChannelFragment.tag(((MessageEventMessage) message).chid));
                 if (channelFragment != null) {
                     channelFragment.processMessage(((MessageEventMessage) message).chid, new ChannelMessage((MessageEventMessage) message));
                 }
@@ -201,13 +214,16 @@ public final class Controller {
             case Action.REGISTER: {
                 // При успешной регистрации сразу приходит сообщение об авторизации, поэтому
                 // больше нечего обрабатывать
-                Log.e(TAG, "Successful registration");
+                //Log.e(TAG, "Successful registration");
+                Toast.makeText(mainActivity, R.string.successfull_register, Toast.LENGTH_SHORT).show();
                 break;
             }
             case Action.SET_USER_INFO: {
+                Toast.makeText(mainActivity, R.string.toast_info_changed, Toast.LENGTH_SHORT).show();
                 break;
             }
             case Action.USER_INFO: {
+                fragmentReplacer.showUserInfoFragment(((UserInfoResponseMessage) message).nick, ((UserInfoResponseMessage) message).userStatus, true);
                 break;
             }
             case Action.WELCOME: {
@@ -220,6 +236,9 @@ public final class Controller {
                 } else {
                     fragmentReplacer.showAuthFragment(false);
                 }
+                break;
+            }
+            case Action.MESSAGE: {
                 break;
             }
         }
@@ -282,8 +301,6 @@ public final class Controller {
             return;
         }
 
-        //showLoadingDialog();
-
         mLastEnterChannelId = channel.chid;
 
         EnterRequestMessage enterMessage = new EnterRequestMessage();
@@ -333,5 +350,47 @@ public final class Controller {
         sendMessage.cid = userId;
         sendMessage.sid = sessionId;
         mainActivity.sendMessage(sendMessage);
+    }
+
+    public void createChannel(String channelName, String channelDescription, String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        CreateChannelRequestMessage createChannelMessage = new CreateChannelRequestMessage();
+        createChannelMessage.name = channelName;
+        createChannelMessage.descr = channelDescription;
+        createChannelMessage.cid = userId;
+        createChannelMessage.sid = sessionId;
+        mainActivity.sendMessage(createChannelMessage);
+    }
+
+    public void changeUserInfo(String status, String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        SetUserInfoRequestMessage setUserInfoMessage = new SetUserInfoRequestMessage();
+        setUserInfoMessage.userStatus = status;
+        setUserInfoMessage.cid = userId;
+        setUserInfoMessage.sid = sessionId;
+        mainActivity.sendMessage(setUserInfoMessage);
+    }
+
+    public void getUserInfo(String requestedUserId, String userId, String sessionId) {
+        MainActivity mainActivity = mMainActivityWeakRef.get();
+        if (mainActivity == null) {
+            return;
+        }
+
+        //showLoadingDialog();
+
+        UserInfoRequestMessage userInfoMessage = new UserInfoRequestMessage();
+        userInfoMessage.user = requestedUserId;
+        userInfoMessage.cid = userId;
+        userInfoMessage.sid = sessionId;
+        mainActivity.sendMessage(userInfoMessage);
     }
 }

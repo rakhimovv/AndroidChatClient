@@ -170,11 +170,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        disconnect();
         if (mController != null) {
+            // Log.e(TAG, "Leave all channels.");
+            // mController.leaveAllChannels(MyPreferences.loadUserId(mController.mPrefs), MyPreferences.loadSessionId(mController.mPrefs));
+            //Log.e(TAG, "Delete auth data.");
             MyPreferences.deleteAuthData(mController.mPrefs);
             Log.e(TAG, "onStop(): Delete Auth Data");
         }
+        disconnect();
         super.onStop();
     }
 }

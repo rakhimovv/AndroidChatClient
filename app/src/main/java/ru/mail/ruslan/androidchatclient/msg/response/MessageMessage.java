@@ -55,7 +55,7 @@ public class MessageMessage implements BaseMessage {
 
     @Override
     public String getAction() {
-        return Action.SET_USER_INFO;
+        return Action.MESSAGE;
     }
 
     @Override
