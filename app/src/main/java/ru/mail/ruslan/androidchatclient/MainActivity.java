@@ -16,6 +16,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.JsonSyntaxException;
+
 import java.net.ProtocolException;
 
 import ru.mail.ruslan.androidchatclient.msg.BaseMessage;
@@ -74,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     } catch (ProtocolException e) {
                         Log.e(TAG, "JsonProtocol exception: " + data);
+                    } catch (JsonSyntaxException ex) {
+                        Log.e(TAG, "JsonProtocolSyntax exception: " + data);
                     }
                     break;
                 }

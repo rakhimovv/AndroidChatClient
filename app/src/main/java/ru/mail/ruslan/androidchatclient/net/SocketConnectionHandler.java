@@ -99,14 +99,15 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     private class inboundConnection implements Runnable {
         public void run() {
-            final byte[] buf = new byte[1024 * 256];
+            final byte[] buf = new byte[1024 * 64];
             while (!mStopped && !inThread.isInterrupted()) {
                 try {
                     int read = mInputStream.read(buf);
-                    if (read != -1) {
+                    if (read > 0) {
                         String data = new String(Arrays.copyOf(buf, read), "UTF-8");
                         String[] dataStr = data.split("\\}\\{");
                         for (SocketListener listener : mListeners) {
+                            String newData;
                             if (dataStr.length == 1) {
                                 //Log.e(TAG, "NEW DATA: " + dataStr[0]);
                                 listener.onDataReceived(dataStr[0]);

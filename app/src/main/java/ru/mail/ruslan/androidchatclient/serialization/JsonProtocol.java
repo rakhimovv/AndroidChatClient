@@ -3,6 +3,7 @@ package ru.mail.ruslan.androidchatclient.serialization;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import java.net.ProtocolException;
 import java.util.ArrayList;
@@ -132,7 +133,7 @@ public class JsonProtocol implements Protocol {
     }
 
     @Override
-    public BaseMessage decode(String stringData) throws ProtocolException {
+    public BaseMessage decode(String stringData) throws ProtocolException, JsonSyntaxException {
         // parser
         if (stringData == null) {
             return null;
