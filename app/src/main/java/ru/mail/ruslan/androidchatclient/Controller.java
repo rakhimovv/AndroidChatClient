@@ -227,7 +227,6 @@ public final class Controller {
                 break;
             }
             case Action.WELCOME: {
-                MyPreferences.deleteAuthData(mPrefs);
                 if (MyPreferences.isLoggedIn(mPrefs)) {
                     AuthRequestMessage authRequestMessage = new AuthRequestMessage();
                     authRequestMessage.login = MyPreferences.loadLogin(mPrefs);

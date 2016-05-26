@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e(TAG, "onCreate()");
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState == null) {
@@ -147,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        Log.e(TAG, "onResume()");
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
         manager.registerReceiver(mRemoteServiceReceiver, new IntentFilter(RemoteService.ACTION_CONNECTED));
         manager.registerReceiver(mRemoteServiceReceiver, new IntentFilter(RemoteService.ACTION_CONNECTION_FAILED));
@@ -157,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Log.e(TAG, "onStart()");
         if (isInternetConnection()) {
             connectToRemoteService();
         }
@@ -165,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        Log.e(TAG, "onPause()");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mRemoteServiceReceiver);
     }
 
@@ -176,7 +180,14 @@ public class MainActivity extends AppCompatActivity {
             //Log.e(TAG, "onStop(): Delete Auth Data");
         }
         */
+        Log.e(TAG, "onStop()");
         disconnect();
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e(TAG, "onDestroy()");
     }
 }
