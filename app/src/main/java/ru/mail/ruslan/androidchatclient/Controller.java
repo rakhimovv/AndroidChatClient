@@ -38,9 +38,7 @@ public final class Controller {
     public FragmentReplacer fragmentReplacer;
     public SharedPreferences mPrefs;
 
-    // FIXME This field needs because server don't send channel_id in enter response
     private String mLastEnterChannelId;
-    // FIXME This field needs because server don't send channel_id in leave response
     private String mLastLeaveChannelId;
 
     public Controller(MainActivity mainActivity) {
@@ -384,8 +382,6 @@ public final class Controller {
         if (mainActivity == null) {
             return;
         }
-
-        //showLoadingDialog();
 
         UserInfoRequestMessage userInfoMessage = new UserInfoRequestMessage();
         userInfoMessage.user = requestedUserId;

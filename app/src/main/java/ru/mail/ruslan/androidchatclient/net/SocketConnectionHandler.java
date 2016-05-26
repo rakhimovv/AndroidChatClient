@@ -2,12 +2,12 @@ package ru.mail.ruslan.androidchatclient.net;
 
 import android.util.Log;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -99,28 +99,52 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     private class inboundConnection implements Runnable {
         public void run() {
-            final byte[] buf = new byte[1024 * 64];
+            //final byte[] buf = new byte[1024 * 64];
+            final byte[] buf = new byte[1024 * 8];
+            DataProcessor dataProcessor = new JSONDataProcessor();
+            StringBuilder builder = new StringBuilder();
             while (!mStopped && !inThread.isInterrupted()) {
                 try {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     int read = mInputStream.read(buf);
-                    if (read > 0) {
-                        String data = new String(Arrays.copyOf(buf, read), "UTF-8");
-                        String[] dataStr = data.split("\\}\\{");
-                        for (SocketListener listener : mListeners) {
-                            String newData;
-                            if (dataStr.length == 1) {
-                                //Log.e(TAG, "NEW DATA: " + dataStr[0]);
-                                listener.onDataReceived(dataStr[0]);
-                            } else {
-                                for (int i = 0; i < dataStr.length; i++) {
-                                    if (i % 2 == 0) {
-                                        //Log.e(TAG, "NEW DATA: " + dataStr[i] + "}");
-                                        listener.onDataReceived(dataStr[i] + "}");
-                                    } else {
-                                        //Log.e(TAG, "NEW DATA: " + "{" + dataStr[i]);
-                                        listener.onDataReceived("{" + dataStr[i]);
-                                    }
+                    Log.e(TAG, "Read bytes from socket: " + read);
+
+                    if (read != -1) {
+                        baos.write(buf, 0, read);
+                    }
+
+                    baos.flush();
+                    baos.close();
+
+                    builder.append(new String(baos.toByteArray(), "UTF-8"));
+
+                    //String data = new String(Arrays.copyOf(buf, read), "UTF-8");
+                    /*
+                    String[] dataStr = builder.toString().split("\\}\\{");
+                    for (SocketListener listener : mListeners) {
+                        String newData;
+                        if (dataStr.length == 1) {
+                            //Log.e(TAG, "NEW DATA: " + dataStr[0]);
+                            listener.onDataReceived(dataStr[0]);
+                        } else {
+                            for (int i = 0; i < dataStr.length; i++) {
+                                if (i % 2 == 0) {
+                                    //Log.e(TAG, "NEW DATA: " + dataStr[i] + "}");
+                                    listener.onDataReceived(dataStr[i] + "}");
+                                } else {
+                                    //Log.e(TAG, "NEW DATA: " + "{" + dataStr[i]);
+                                    listener.onDataReceived("{" + dataStr[i]);
                                 }
+                            }
+                        }
+                    }
+                    */
+                    List<String> dataParts = dataProcessor.process(builder.toString());
+                    if (dataParts != null) {
+                        builder.setLength(0);
+                        for (SocketListener listener : mListeners) {
+                            for (String dataPart : dataParts) {
+                                listener.onDataReceived(dataPart);
                             }
                         }
                     }
