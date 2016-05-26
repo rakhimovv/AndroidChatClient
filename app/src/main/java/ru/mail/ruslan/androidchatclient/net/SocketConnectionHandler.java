@@ -99,7 +99,7 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     private class inboundConnection implements Runnable {
         public void run() {
-            final byte[] buf = new byte[1024 * 64];
+            final byte[] buf = new byte[1024 * 256];
             while (!mStopped && !inThread.isInterrupted()) {
                 try {
                     int read = mInputStream.read(buf);

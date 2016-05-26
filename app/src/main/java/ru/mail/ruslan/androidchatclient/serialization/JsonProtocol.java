@@ -138,6 +138,12 @@ public class JsonProtocol implements Protocol {
             return null;
         }
 
+        /*
+        JsonReader reader = new JsonReader(new StringReader(stringData.trim()));
+        reader.setLenient(true);
+        JsonObject json = jsonParser.parse(reader).getAsJsonObject();
+        */
+
         JsonObject json = jsonParser.parse(stringData.trim()).getAsJsonObject();
         if (!json.has("action")) {
             return null;
